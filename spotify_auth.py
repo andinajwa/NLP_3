@@ -165,17 +165,23 @@ if st.button("🔍 Prediksi Mood"):
             text_vec = vectorizer.transform([text_input])
 
             if model_choice == "MLP + BoW":
-                mood_code = np.argmax(model.predict(text_vec), axis=1)[0]
+                pred_probs = model.predict(text_vec.toarray())
+                mood_code = np.argmax(pred_probs, axis=1)[0]
+                confidence = float(np.max(pred_probs))
             else:
-                mood_code = model.predict(text_vec)[0]
+                pred_probs = model.predict_proba(text_vec)
+                mood_code = np.argmax(pred_probs, axis=1)[0]
+                confidence = float(np.max(pred_probs))
 
             mood = label_to_mood.get(mood_code, "unknown")
             emoji = mood_emoji.get(mood, "🎭")
+
 
             # Tampilkan hasil prediksi
             st.markdown(f"""
                 <div class='card'>
                     <h3>🎯 Mood Terdeteksi: {emoji} <b>{mood.upper()}</b></h3>
+                    <p>🔒 Tingkat Keyakinan: <b>{confidence*100:.2f}%</b></p>
             """, unsafe_allow_html=True)
 
             token = get_access_token()
